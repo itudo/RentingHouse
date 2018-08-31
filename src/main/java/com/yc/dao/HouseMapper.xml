@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yc.dao.HouseMapper">
+
+	<!-- 使用默认mybatis : 二级缓存 -->
+	<cache eviction="FIFO" flushInterval="60000" size="512" readOnly="true" />
+	
+	<!-- 添加房屋信息 -->
+	<insert id="saveHouse" parameterType="House" keyProperty="id" useGeneratedKeys="true">
+		insert into house(user_id,type_id,title,description,price,pubdate,floorage,contact,houseimg,street_id)
+		values(#{user.id},#{type.id},#{title},#{description},#{price},now(),#{floorage},#{contact},#{houseimg},#{street.id})
+	</insert>
+	
+	<!-- 更新房屋信息 -->
+	<update id="updateHouse" parameterType="House">
+		update house set title = #{title},description = #{description},price = #{price},
+		pubDate = now(),floorage = #{floorage},contact = #{contact},user_id = #{user.id},
+		type_id = #{type.id},street_id = #{street.id},houseimg=#{houseimg}
+		where id = #{id}
+	</update>
+	
+	<!-- 各种查询条件的拼接 -->
+	<sql id="conditionSql">
+		<where>
+			<if test="title != null and title != ''">
+				title like '%#{title}%'
+			</if>
+			<if test="minPrice != null and maxPrice != null">
+				and (price between #{minPrice} and #{maxPrice})
+			</if>
+			<if test="minFloorages != null and maxFloorage != null">
+				and (floorage between #{minFloorage} and #{maxFloorage})
+			</if>
+			<if test="typeId != null and typeId != ''">
+				and type_id = #{typeId}
+			</if>
+			<if test="distrcitId != null and districtId != ''">
+				and district_id = #{districtId}
+			</if>
+			<if test="id != null and id != ''">
+				and h.id = #{id}
+			</if>
+		</where>
+	</sql>
+	
+	<!-- 排序条件的拼接 -->
+	<sql id="orderSql">
+		<if test="orderby != null and orderby != ''">
+			order by #{orderby}
+			<if test="orderway != null and orderway != ''">
+				#{orderway}
+			</if>
+		</if>
+	</sql>
+	
+	<resultMap type="User" id="UserMap">
+		<id property="id" column="uid" />
+		<result property="name" column="username" />
+		<result property="telephone" column="telephone" />
+	</resultMap>
+	
+	<resultMap type="HouseType" id="TypeMap">
+		<id property="id" column="tid" />
+		<result property="name" column="type" />
+	</resultMap>
+	
+	<resultMap type="District" id="DistrictMap">
+		<id property="id" column="did" />
+		<result property="name" column="dname" />
+	</resultMap>
+	
+	<resultMap type="Street" id="StreetMap">
+		<id property="id" column="sid" />
+		<result property="name" column="sname" />
+		<association property="district" javaType="District" resultMap="DistrictMap"/>
+	</resultMap>
+	
+	<resultMap type="House" id="HouseMap">
+		<id property="id" column="hid" />
+		<result property="title" column="title" />
+		<result property="description" column="description" />
+		<result property="price" column="price" />
+		<result property="pubDate" column="pubDate" />
+		<result property="floorage" column="floorage" />
+		<result property="contact" column="contact" />
+		<result property="houseimg" column="houseimg" />
+		<association property="user" javaType="User" resultMap="UserMap"/>
+		<association property="type" javaType="HouseType" resultMap="TypeMap"/>
+		<association property="street" javaType="Street" resultMap="StreetMap"/>
+	</resultMap>
+	
+	<!-- 带查询条件，分页条件，排序条件的查询 -->
+	<select id="findHouseCondition" parameterType="java.util.Map" resultMap="HouseMap">
+		select h.id as hid,u.id as uid,u.username,u.telephone,d.id as did,d.`NAME` as dname,st.ID as sid,st.`NAME` as sname,ht.id as tid,ht.`NAME` as type,h.title,h.description,h.price,date_format(h.pubdate,'%Y-%c-%d') as pubdate,h.floorage,h.contact,h.houseimg from house h 
+		left join users u on h.USER_ID=u.ID 
+		left join housetype ht on h.TYPE_ID=ht.ID 
+		left join street st on h.STREET_ID=st.ID 
+		left join district d on st.DISTRICT_ID=d.ID 
+		<include refid="conditionSql"/> 
+		<include refid="orderSql"/> 
+		<include refid="pageSql"/> 
+	</select>
+	
+	<!-- 分页条件的拼接 -->
+	<sql id="pageSql">
+		<!-- <if test="_parameter != null"> -->
+		<if test="start != null and pagesize != null ">
+			limit #{start},#{pagesize}
+		</if>
+	</sql>
+	
+	
+	
+	<!-- 带查询条件统计查询 -->
+	<select id="findHouseConditionCount" parameterType="map" resultType="Integer">
+		select count(*) from house <include refid="conditionSql"/>
+	</select>
+	
+	<!-- 根据id删除多条信息 -->
+	<delete id="delSingleHouse">
+		delete from house where id = #{id}
+	</delete>
+	
+	<!-- 根据id删除多条信息 -->
+	<delete id="delMutilHouse" parameterType="House">
+		delete from house where id in 
+		<foreach collection="list" open="(" close=")" separator="," item="id">
+			#{id}
+		</foreach>
+	</delete>
+</mapper>

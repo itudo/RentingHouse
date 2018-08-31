@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<script src="js/jquery-1.8.0.js"></script>
+<title>文件上传</title>
+</head>
+<body>
+	
+	<form name="myForm"  enctype="multipart/form-data">
+	    <input type="text" id="userName" name="userName">
+	    <input type="file" name="img">
+	    <input type="button" id="btn" value="submit">
+	</form>
+	<hr>
+	<img id="img" src="/pic/2018/8/20180811094402.jpg">
+	<form action="filedown.action" method="get">
+		<input id="down" type="button" value="下载">
+	</form>
+<script type="text/javascript">
+	//var form = new FormData($("#file"));
+	$("#btn").click(function() {
+	    var fm = new FormData();
+	    alert($('input[type=file]')[0].files[0])
+	    fm.append('userName',$("#userName").val());
+	    fm.append('img', $('input[type=file]')[0].files[0]);
+	    $.ajax(
+	        {
+	            url: 'fileupload.action',
+	            type: 'POST',
+	            data: fm,
+	            contentType: false, //禁止设置请求类型
+	            processData: false, //禁止jquery对DAta数据的处理,默认会处理
+	            //禁止的原因是,FormData已经帮我们做了处理
+	            success: function (result) {
+	                //测试是否成功
+	                //但需要你后端有返回值
+	                alert(result.obj);
+	            }
+	        }
+	    );
+
+	});
+</script>
+</body>
+</html>

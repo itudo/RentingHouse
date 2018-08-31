@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>青鸟租房 - 用户管理</title>
+<link type="text/css" rel="stylesheet" href="css/style.css" />
+<script type="text/javascript" src="js/function.js"></script>
+<script src="js/jquery-1.8.0.js"></script>
+</head>
+<body>
+	<div id="header" class="wrap">
+		<div id="logo">
+			<img src="images/logo.gif" />
+		</div>
+		<div class="search">
+		<label class="ui-green"><input id="huanyin" type="button" name="huanyin" onclick="javascript:void(0)" value="欢迎您，XXX"/></label>
+			<label class="ui-green">
+			<input onclick="toAddHouse()" type="button" name="search" value="发布房屋信息" /></label> 
+			<label id="logoutLabel"  class="ui-green"><input style="display:none;" onclick="logout()" id="logout" type="button" name="search" value="退 出登录"/></label>
+		</div>
+	</div>
+	<div class="main wrap">
+		<div id="houseArea">
+			<table class="house-list">
+				
+			</table>
+			<div class="pager">
+				<ul>
+					<li class="current"><a  id="start" href="javascript:initHouseList(1)"> 首页</a></li>
+					<li class="current"><a  id="pre" href="javascript:initHouseList(1)"> 上一页</a></li>
+					<li class="current"><a  id="next" href="javascript:initHouseList(1)"> 下一页</a></li>
+					<li class="current"><a  id="end" href="javascript:initHouseList(1)"> 尾页</a></li>
+				</ul>
+				<span class="total"></span>
+			</div>
+		</div>
+	</div>
+<script type="text/javascript">
+$(function() {
+	init();
+});
+function init() {
+	$.getJSON("getLoginer.action",function(user) {
+		if(user.code==1) {
+			$("#huanyin").attr("value","欢迎您，"+user.obj.username);
+			$("#logout").attr("style","display:block;");
+		} else {
+			$("#huanyin").attr("value","尚未登录，请登录");
+			$("#huanyin").attr("onclick","document.location='./login.html'");
+		}
+	});
+}
+</script>
+</body>
+</html>

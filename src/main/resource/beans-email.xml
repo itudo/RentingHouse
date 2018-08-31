@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xmlns:task="http://www.springframework.org/schema/task"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+    	http://www.springframework.org/schema/beans/spring-beans.xsd
+    	http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop.xsd
+    	http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd
+    	http://www.springframework.org/schema/context
+    	http://www.springframework.org/schema/context/spring-context.xsd
+    	">
+    	
+    	<!-- 邮件，定时器操作，权限 -->
+    	<!-- 打开定时器开关，启用task注解驱动 -->
+    	<!-- <task:annotation-driven/> -->
+    	<!-- 执行器 -->
+    	<!-- <task:scheduler id="taskSceduler" pool-size="100" /> -->
+    	<!-- 所有任务配置在这里 -->
+    	<!-- <task:scheduled-task scheduler="taskScheduler"> -->
+    		<!-- 定时任务配置 -->
+    		<!-- <task:scheduled ref="countTask" method="test1" cron="0/10 * * * * ?"/> -->
+    	<!-- </task:scheduled-task> -->
+</beans> 

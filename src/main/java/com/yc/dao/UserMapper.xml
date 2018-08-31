@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yc.dao.UserMapper">
+
+	<!-- 使用默认mybatis : 二级缓存 -->
+	<cache eviction="FIFO" flushInterval="60000" size="512" readOnly="true" />
+	<!-- 根据用户名和密码查询用户是否存在 -->
+	<select id="isUserExists" resultType="User" parameterType="User">
+		select count(1) from users where username = #{username}
+	</select>
+	<!-- 根据用户名和密码查询用户 -->
+	<select id="getUserByLogin" resultType="User" parameterType="User">
+		select * from users where username = #{username} and password = #{password}
+	</select>
+	
+	<!-- 根据id查询用户 -->
+	<select id="getUserById" resultType="User" parameterType="User">
+		select * from users where id = #{id}
+	</select>
+	
+	<!-- 添加用户，要返回用户的编号 -->
+	<insert id="saveUser" parameterType="User" useGeneratedKeys="true" keyProperty="id">
+		insert into users(name,password,telephone,username,isadmin) values(#{name},#{password},
+		<choose>
+			<when test="telephone != null">#{telephone}</when>
+			<otherwise>''</otherwise>
+		</choose>
+		,#{username},
+		<choose>
+			<when test="isadmin !=null">#{isadmin}</when>
+			<otherwise>'0'</otherwise>
+		</choose>
+		)
+	</insert>
+
+</mapper>

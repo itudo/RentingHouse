@@ -1,0 +1,140 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>青鸟租房 - 用户管理</title>
+<link type="text/css" rel="stylesheet" href="css/style.css" />
+<script type="text/javascript" src="js/function.js"></script>
+<script src="js/jquery-1.8.0.js"></script>
+</head>
+<body>
+	<div id="header" class="wrap">
+		<div id="logo">
+			<img src="images/logo.gif" />
+		</div>
+		<div class="search">
+		<label class="ui-green"><input id="huanyin" type="button" name="huanyin" onclick="javascript:void(0)" value="欢迎您，XXX"/></label>
+			<label class="ui-green">
+			<input onclick="toAddHouse()" type="button" name="search" value="发布房屋信息" /></label> 
+			<label id="logoutLabel"  class="ui-green"><input style="display:none;" onclick="logout()" id="logout" type="button" name="search" value="退 出登录"/></label>
+		</div>
+	</div>
+	<div class="main wrap">
+		<div id="houseArea">
+			<table class="house-list">
+				
+			</table>
+			<div class="pager">
+				<ul>
+					<li class="current"><a  id="start" href="javascript:initHouseList(1)"> 首页</a></li>
+					<li class="current"><a  id="pre" href="javascript:initHouseList(1)"> 上一页</a></li>
+					<li class="current"><a  id="next" href="javascript:initHouseList(1)"> 下一页</a></li>
+					<li class="current"><a  id="end" href="javascript:initHouseList(1)"> 尾页</a></li>
+				</ul>
+				<span class="total"></span>
+			</div>
+		</div>
+	</div>
+	<div id="footer" class="wrap">
+		<dl>
+			<dt>青鸟租房 &copy; 2015 源辰信息科技有限公司 湘ICP证1000001号</dt>
+			<dd>关于我们 · 联系方式 · 意见反馈 · 帮助中心</dd>
+		</dl>
+	</div>
+<script type="text/javascript">
+$(function() {
+	init();
+	initHouseList(1);
+});
+function init() {
+	$.getJSON("getLoginer.action",function(user) {
+		if(user.code==1) {
+			$("#huanyin").attr("value","欢迎您，"+user.obj.username);
+			$("#logout").attr("style","display:block;");
+		} else {
+			$("#huanyin").attr("value","尚未登录，请登录");
+			$("#huanyin").attr("onclick","document.location='./login.html'");
+		}
+	});
+}
+function initHouseList(pages) {
+	$.getJSON("getLoginer.action",function(user) {
+		$.getJSON("getHouseList.action",{pages:pages},function(house) {
+			//alert(house.obj[0].id)
+			if(house.code==1) {
+				var str = '';
+				var obj = house.list;
+				//alert(obj[0].user.id)
+				for(var i=0;i<obj.length;i++) {
+					str += "<tr><td class='house-thumb'><span><a href='page/show.jsp?id=10001'>";
+					str += "<img style='width:400px;height:200px;' src='"+obj[i].houseimg+"' /></a></span></td><td>";
+					str += "<dl><dt><a href='show.html?id="+obj[i].id+"'>"+obj[i].title+"</a></dt>"
+					str += "<dd>"+obj[i].street.district.name+" | "+obj[i].street.name+"<br />"+obj[i].floorage+"层,"+obj[i].contact+"平米<br /> 联系方式："+obj[i].user.telephone+"</dd></dl></td>";
+					if(user.code==1) {
+						//alert(obj[i].user.id)
+						if(user.obj.id==obj[i].user.id) {
+							str += "<td class='house-update'><label class='ui-green'><input type='button' onclick='update("+obj[i].id+")' value='修    改' /></label></td>";
+							str += "<td class='house-del'><label class='ui-green'><input type='button' onclick='del("+obj[i].id+")' value='删    除' /></label></td></tr>";
+						} else {
+							str += "<td class='house-update'><label class='ui-green'><input type='button' onclick='javascript:void(0)' value='发布人' /></label></td>";
+							str += "<td class='house-del'><label class='ui-green'><input type='button' onclick='javascript:void(0)' value='"+obj[i].user.name	+"' /></label></td></tr>";
+						}
+					}
+				}
+				$(".house-list").html(str);
+				
+				var total = house.total;
+				var pagesize = house.pagesize;
+				var totalpages = house.totalpages;
+				var prePage = pages>1?pages-1:pages;
+				var nextPage = pages<totalpages?pages+1:totalpages;
+				$(".total").html("");
+				$(".total").append("第"+pages+"页/共"+totalpages+"页&nbsp;&nbsp;&nbsp;每页"+pagesize+"条/共"+total+"条")
+				$("#pre").attr("href","javascript:initHouseList("+prePage+")");
+				$("#next").attr("href","javascript:initHouseList("+nextPage+")");
+				$("#end").attr("href","javascript:initHouseList("+totalpages+")");
+				//alert(pages);
+			} else {
+				alert("列表显示失败："+obj.errmsg);
+			}
+		});
+	});
+	
+}
+function logout() {
+	$.getJSON("userLogout.action",function(data) {
+		if(data.code==1) {
+			document.location='./index.html';
+		}
+	});
+}
+function toAddHouse() {
+	var loginState = $("#logout").attr("style");
+	var logoutState = "display:none;";
+	//alert(loginState+"="+logoutState)
+	//alert(loginState==logoutState)
+	if(loginState==logoutState) {
+		alert("您尚未登录，不可发布信息")
+	} else {
+		document.location='./add.html'
+	}
+}
+function del(id) {
+	var isDel = confirm("是否确定删除");
+	if(isDel) {
+		$.getJSON("delHouse.action",{id:id},function(data){
+				if(data.code==1) {
+					alert("删除房屋成功！");
+					init();
+				} else {
+					alert("删除房屋失败："+data.errmsg);
+				}
+			})
+		}
+}
+function update(id) {
+	document.location='./update.html?id='+id;
+}
+</script>
+</body>
+</html>
